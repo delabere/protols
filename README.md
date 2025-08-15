@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.lsp.start({
       name = "protols",
-      cmd = { "/Users/jackrickards/src/github.com/monzo/protols/protols", "serve", "--stdio" },
+      cmd = { "<yourpath>/protols", "serve", "--stdio" },
       root_dir = vim.fs.dirname(vim.fs.find({ ".git" }, { upward = true })[1]) or vim.fn.getcwd(),
     })
   end,
