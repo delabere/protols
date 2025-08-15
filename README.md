@@ -19,3 +19,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 ```
+
+If you use Noice then you need to run
+`:NoiceDisable` to get rid of the annoying errors
