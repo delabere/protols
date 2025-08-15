@@ -19,9 +19,3 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 ```
-
-# Special Thanks
-
-This project is derived from [bufbuild/protocompile](https://github.com/bufbuild/protocompile) and [jhump/protoreflect](https://github.com/jhump/protoreflect). Thanks to the buf developers for their fantastic work.
-
-Several packages in <https://github.com/golang/tools> are used to build the language server. A minimal subset of its lsp-related packages are maintained as a library at <https://github.com/kralicky/tools-lite>.
