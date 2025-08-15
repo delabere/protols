@@ -1,5 +1,12 @@
 # In Neovim
 
+
+
+# Installing
+
+1. Clone this repo
+2. Build and install the protols binary: `go install ./cmd/protols`
+3. Add this to your Neovim config
 ```lua
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "proto",
@@ -12,14 +19,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 ```
-
-# Installing
-
-1. Clone this repo
-2. Build and install the protols binary: `go install ./cmd/protols`
-3. Install `vsce` if you don't have it: `npm install --global @vscode/vsce`
-4. cd to editors/vscode, then run `vsce package`
-5. Install the vsix plugin: `code --install-extension ./protols-vscode-<version>.vsix`
 
 # Special Thanks
 
