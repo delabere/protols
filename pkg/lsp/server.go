@@ -82,7 +82,7 @@ func (s *Server) cacheInitLocked(cache *Cache, path string) {
 	ctx, ca := context.WithCancelCause(context.Background())
 	s.cacheCancels[path] = ca
 
-	cache.LoadFiles(sources.SearchDirs(path))
+	// Defer file loading to avoid blocking LSP initialization
 	s.caches[path] = cache
 
 	diagnostics := make(chan protocol.WorkspaceFullDocumentDiagnosticReport, 1)
@@ -221,6 +221,15 @@ func (s *Server) CacheForURI(uri protocol.DocumentURI) (*Cache, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid uri: %w", err)
 	}
+
+	// Debug: Uncomment for troubleshooting
+	// fmt.Fprintf(os.Stderr, "DEBUG: CacheForURI called with: %s\n", uri)
+	// fmt.Fprintf(os.Stderr, "DEBUG: Parsed URI path: %s\n", u.Path)
+	// fmt.Fprintf(os.Stderr, "DEBUG: Available cache paths:\n")
+	// for path := range caches {
+	// 	fmt.Fprintf(os.Stderr, "  - %s\n", path)
+	// }
+
 	if u.Fragment != "" {
 		for _, c := range caches {
 			if c.workspace.Name == u.Fragment {
@@ -230,20 +239,24 @@ func (s *Server) CacheForURI(uri protocol.DocumentURI) (*Cache, error) {
 		return nil, fmt.Errorf("%w: workspace %s does not exist", jsonrpc2.ErrMethodNotFound, u.Fragment)
 	}
 	for path, c := range caches {
+		// fmt.Fprintf(os.Stderr, "DEBUG: Checking if '%s' has prefix '%s'\n", u.Path, path)
 		if strings.HasPrefix(u.Path, path) {
 			// special case: ignore ${workspaceFolder}/vendor
 			if strings.HasPrefix(u.Path, path+"/vendor") {
 				continue
 			}
+			// fmt.Fprintf(os.Stderr, "DEBUG: Found matching cache for path: %s\n", path)
 			return c, nil
 		}
 	}
 	// worst case, use the first cache that tracks the given uri (todo: this can be improved)
 	for _, c := range caches {
 		if c.TracksURI(uri) {
+			// fmt.Fprintf(os.Stderr, "DEBUG: Found cache that tracks URI: %s\n", uri)
 			return c, nil
 		}
 	}
+	// fmt.Fprintf(os.Stderr, "DEBUG: No cache found for URI: %s\n", uri)
 	return nil, fmt.Errorf("%w: uri %s does not belong to any workspace folder", jsonrpc2.ErrMethodNotFound, uri)
 }
 
@@ -280,7 +293,20 @@ func (s *Server) Initialized(ctx context.Context, params *protocol.InitializedPa
 	}); err != nil {
 		return err
 	}
+
+	// Load files immediately after LSP initialization
+	s.loadWorkspaceFiles()
+
 	return nil
+}
+
+func (s *Server) loadWorkspaceFiles() {
+	s.cachesMu.RLock()
+	defer s.cachesMu.RUnlock()
+
+	for path, cache := range s.caches {
+		cache.LoadFiles(sources.SearchDirs(path))
+	}
 }
 
 // Definition implements protocol.Server.

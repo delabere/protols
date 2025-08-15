@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
-	"os"
 	"regexp"
 	"slices"
 	"sort"
@@ -275,7 +274,7 @@ func computeSemanticTokens(cache *Cache, e *semanticItems, walkOptions ...ast.Wa
 				msg.WriteString(strings.Repeat(" ", max(len(lineText)+1-int(item.start+item.len), 0)))
 				msg.WriteString(fmt.Sprintf("  [type: %s; modifiers: %s]\n", item.typ.String(), item.mods.String()))
 			}
-			fmt.Fprintln(os.Stderr, msg.String())
+			slog.Debug(msg.String())
 			reportCount++
 			overlapping = []semanticItem{}
 
@@ -908,7 +907,7 @@ func (s *semanticItems) inspectCelExpr(messageLit *ast.MessageLiteralNode) ([]*a
 				slog.Warn("error parsing CEL expression",
 					"location", s.AST().NodeInfo(stringNodes[0]).String(),
 				)
-				fmt.Println(issues.Err())
+				slog.Debug("CEL validation issues", "error", issues.Err())
 				// TODO
 				// diagnostics = append(diagnostics, ProtoDiagnostic{
 				// 	Pos:      s.AST().NodeInfo(stringNodes[0]),

@@ -410,7 +410,7 @@ func (c *Cache) GetCompletions(params *protocol.CompletionParams) (result *proto
 			}
 		}
 		if shouldCompleteType {
-			fmt.Println("completing type", completeType)
+			// completing type
 			var scope protoreflect.FullName
 			if len(path.Path) > 1 {
 				if desc, _, err := deepPathSearch(path.Path[:len(path.Path)-1], searchTarget, maybeCurrentLinkRes); err == nil {
